@@ -1,12 +1,18 @@
 import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
 import React from "react";
-import { Link, router } from "expo-router";
+import { Link, Redirect, router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { images } from "../constants";
 import CustomButton from "../components/CustomButton";
 
+import { useGlobalContext } from "../context/GlobalProvider";
+
 const Index = () => {
+  const { isLoading, isLoggedIn } = useGlobalContext();
+
+  if (!isLoading && isLoggedIn) return <Redirect href="/home" />;
+
   return (
     <SafeAreaView className="bg-primary h-full">
       <ScrollView contentContainerStyle={{ height: "100%" }}>
@@ -24,7 +30,7 @@ const Index = () => {
 
           <View>
             <Text className="text-3xl text-white font-bold text-center">
-              Discover Endless Possibilities with {" "}
+              Discover Endless Possibilities with{" "}
               <Text className="text-secondary-200">Aora</Text>
             </Text>
             <Image
@@ -39,14 +45,14 @@ const Index = () => {
             Exploration with Aora
           </Text>
 
-          <CustomButton title="Continue with Email" handlePress={()=>router.push('/sign-in')}
-          containerStyles="w-full mt-7"
-
+          <CustomButton
+            title="Continue with Email"
+            handlePress={() => router.push("/sign-in")}
+            containerStyles="w-full mt-7"
           />
-
         </View>
       </ScrollView>
-      <StatusBar backgroundColor="#161622" style="light"/>
+      <StatusBar backgroundColor="#161622" style="light" />
     </SafeAreaView>
   );
 };
