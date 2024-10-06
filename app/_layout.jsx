@@ -1,8 +1,9 @@
 import { StyleSheet, Text, View } from "react-native";
-import React, { useEffect } from "react";
-import { Link, SplashScreen, Stack } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { Link, SplashScreen, Stack, router } from "expo-router";
 import { useFonts } from "expo-font";
 import GlobalProvider from "../context/GlobalProvider";
+import { getCurrentUser } from "../lib/appWrite";  // Import the getCurrentUser function
 
 SplashScreen.preventAutoHideAsync();
 
@@ -19,7 +20,29 @@ const RootLayout = () => {
     "Poppins-Thin": require("../assets/fonts/Poppins-Thin.ttf"),
   });
 
+  const [isLoading, setIsLoading] = useState(true);  // State to manage the loading status
+  const [isLoggedIn, setIsLoggedIn] = useState(false);  // State to manage the login status
+
   useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const currentUser = await getCurrentUser();  // Check if user session exists
+        if (currentUser) {
+          setIsLoggedIn(true);  // User is logged in
+          router.replace("/home");  // Redirect to home
+        } else {
+          setIsLoggedIn(false);  // No user session
+        }
+      } catch (error) {
+        console.log("Error checking session:", error);
+        setIsLoggedIn(false);
+      } finally {
+        setIsLoading(false);  // Stop loading
+      }
+    };
+
+    checkSession();  // Call the function to check session
+
     if (error) {
       throw error;
     }
@@ -29,8 +52,8 @@ const RootLayout = () => {
     }
   }, [fontsLoaded, error]);
 
-  if (!fontsLoaded && !error) {
-    return null;
+  if (!fontsLoaded || isLoading) {
+    return null;  // Return null while loading fonts or checking session
   }
 
   return (
@@ -39,7 +62,7 @@ const RootLayout = () => {
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        {/* <Stack.Screen name="/search/[query]" options={{ headerShown: false }} /> */}
+        <Stack.Screen name="search/[query]" options={{ headerShown: false }} />
       </Stack>
     </GlobalProvider>
   );

@@ -1,29 +1,37 @@
-import { View, Text, FlatList, Image, Alert } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  Image,
+  Alert,
+  RefreshControl,
+} from "react-native";
 import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { images } from "../../constants";
-import SearchInput from "../../components/SearchInput";
+// import SearchInput from "../../components/SearchInput";
 import TrendingVideos from "../../components/TrendingVideos";
 import EmptyState from "../../components/EmptyState";
-import RefreshControl from "../../components/RefreshControl";
-import { getAllPosts } from "../../lib/appWrite";
+import { getAllVideos, getLatestVideos } from "../../lib/appWrite";
 import useAppWrite from "../../lib/useAppWrite";
+import VideoCard from "../../components/VideoCard";
+import SearchInput from "../../components/SearchInput";
+import { useGlobalContext } from "../../context/GlobalProvider";
 
 const Home = () => {
-
-    const {data:posts, isLoading, reFetch} = useAppWrite(getAllPosts)
+  const { user, setUser, setIsLoggedIn } = useGlobalContext();
+  const { data: videos, refetch } = useAppWrite(getAllVideos);
+  const { data: latestVideos } = useAppWrite(getLatestVideos);
 
   const [refreshing, setRefreshing] = useState(false);
- 
 
-  console.log("posts====>", posts)
-
+  // console.log("latestVideos====>", latestVideos)
 
   const onRefresh = async () => {
     setRefreshing(true);
 
     // re call videos => if any new  videos added
-   await reFetch()
+    await refetch();
 
     setRefreshing(false);
   };
@@ -31,10 +39,12 @@ const Home = () => {
   return (
     <SafeAreaView className="bg-primary h-full">
       <FlatList
-        // data={[{ id: 1 }]}
-        data={[]}
+        data={videos}
+        // data={[]}
         keyExtractor={(item) => item.$id}
-        renderItem={({ item }) => <Text className="text-white">{item.id}</Text>}
+        renderItem={({ item }) => (
+          <VideoCard title={item.title} thumbnail={item.thumbnail} user={item.user} />
+        )}
         ListHeaderComponent={() => (
           <View className="my-6 px-4 space-y-6">
             <View className="justify-between items-start flex-row mb-6">
@@ -42,7 +52,7 @@ const Home = () => {
                 <Text className="font-medium text-sm text-gray-100">
                   Welcome Back
                 </Text>
-                <Text className="text-2xl text-white font-psemibold">John</Text>
+                <Text className="text-2xl text-white font-psemibold">{user?.username}</Text>
               </View>
               <View>
                 <Image
@@ -60,7 +70,7 @@ const Home = () => {
                 Latest Videos
               </Text>
 
-              <TrendingVideos posts={[{ id: 1 }, { id: 2 }, { id: 3 }] ?? []} />
+              <TrendingVideos posts={latestVideos ?? []} />
             </View>
           </View>
         )}
