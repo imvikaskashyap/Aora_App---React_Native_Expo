@@ -15,7 +15,7 @@ const Profile = () => {
 
   // console.log(data, "======????Data>>>>>>>>>>")
 
-  console.log(user, "userId=============>>>>>>>>>.")
+  // console.log(user, "userId=============>>>>>>>>>.")
 
   // console.log(posts)
 

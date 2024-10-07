@@ -25,14 +25,9 @@ const Home = () => {
 
   const [refreshing, setRefreshing] = useState(false);
 
-  // console.log("latestVideos====>", latestVideos)
-
   const onRefresh = async () => {
     setRefreshing(true);
-
-    // re call videos => if any new  videos added
     await refetch();
-
     setRefreshing(false);
   };
 
@@ -40,11 +35,27 @@ const Home = () => {
     <SafeAreaView className="bg-primary h-full">
       <FlatList
         data={videos}
-        // data={[]}
         keyExtractor={(item) => item.$id}
-        renderItem={({ item }) => (
-          <VideoCard title={item.title} thumbnail={item.thumbnail} user={item.user} />
-        )}
+        renderItem={({ item }) => {
+          // Find the corresponding latest video for the current item
+          const latestVideo = latestVideos.find(video => video.$id === item.$id);
+          const likeCounts = latestVideo ? latestVideo.likes.length : 0;
+
+          // Check if the user has liked this video
+          const liked = user?.likedVideos?.some((likedVideo) => likedVideo.$id === item.$id);
+
+          return (
+            <VideoCard
+              title={item.title}
+              thumbnail={item.thumbnail}
+              user={item.user}
+              video={item.video}
+              videoId={item.$id}
+              likeCounts={likeCounts} 
+              liked={liked} 
+            />
+          );
+        }}
         ListHeaderComponent={() => (
           <View className="my-6 px-4 space-y-6">
             <View className="justify-between items-start flex-row mb-6">
@@ -62,14 +73,11 @@ const Home = () => {
                 />
               </View>
             </View>
-
             <SearchInput />
-
             <View className="w-full flex-1 pt-5 pb-8">
               <Text className="text-gray-100 text-lg font-pregular mb-3">
                 Latest Videos
               </Text>
-
               <TrendingVideos posts={latestVideos ?? []} />
             </View>
           </View>
