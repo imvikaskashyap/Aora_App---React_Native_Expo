@@ -21,7 +21,7 @@ import { useGlobalContext } from "../../context/GlobalProvider";
 const Home = () => {
   const { user, setUser, setIsLoggedIn } = useGlobalContext();
   const { data: videos, refetch } = useAppWrite(getAllVideos);
-  const { data: latestVideos } = useAppWrite(getLatestVideos);
+  const { data: latestVideos, } = useAppWrite(getLatestVideos);
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -37,11 +37,10 @@ const Home = () => {
         data={videos}
         keyExtractor={(item) => item.$id}
         renderItem={({ item }) => {
-          // Find the corresponding latest video for the current item
+          
           const latestVideo = latestVideos.find(video => video.$id === item.$id);
           const likeCounts = latestVideo ? latestVideo.likes.length : 0;
 
-          // Check if the user has liked this video
           const liked = user?.likedVideos?.some((likedVideo) => likedVideo.$id === item.$id);
 
           return (
@@ -78,7 +77,7 @@ const Home = () => {
               <Text className="text-gray-100 text-lg font-pregular mb-3">
                 Latest Videos
               </Text>
-              <TrendingVideos posts={latestVideos ?? []} />
+              <TrendingVideos posts={videos ?? []} />
             </View>
           </View>
         )}

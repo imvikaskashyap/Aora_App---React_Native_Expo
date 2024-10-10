@@ -1,10 +1,10 @@
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { View, Image, FlatList, TouchableOpacity } from "react-native";
+import { View, Image, FlatList, TouchableOpacity, Text } from "react-native";
 import { icons } from "../../constants";
 import { useGlobalContext } from "../../context/GlobalProvider";
 import useAppWrite from "../../lib/useAppWrite";
-import { getCurrentUser, getUserVideos, signOut } from "../../lib/appWrite";
+import { getCurrentUser, getLatestVideos, getUserVideos, signOut } from "../../lib/appWrite";
 import EmptyState from "../../components/EmptyState";
 import InfoBox from "../../components/InfoBox";
 import VideoCard from "../../components/VideoCard";
@@ -12,6 +12,8 @@ import VideoCard from "../../components/VideoCard";
 const Profile = () => {
   const { user, setUser, setIsLoggedIn } = useGlobalContext();
   const { data: posts } = useAppWrite(() => getUserVideos(user.$id));
+  const { data: latestVideos, } = useAppWrite(getLatestVideos);
+
 
   // console.log(data, "======????Data>>>>>>>>>>")
 
@@ -32,15 +34,24 @@ const Profile = () => {
       <FlatList
         data={posts}
         keyExtractor={(item) => item.$id}
-        renderItem={({ item }) => (
-          <VideoCard
-            title={item.title}
-            thumbnail={item.thumbnail}
-            video={item.video}
-            creator={item.creator.username}
-            avatar={item.creator.avatar}
-          />
-        )}
+        renderItem={({ item }) => {
+          const latestVideo = latestVideos.find(video => video.$id === item.$id);
+          const likeCounts = latestVideo ? latestVideo.likes.length : 0;
+
+          const liked = user?.likedVideos?.some((likedVideo) => likedVideo.$id === item.$id);
+
+          return (
+            <VideoCard
+              title={item.title}
+              thumbnail={item.thumbnail}
+              user={item.user}
+              video={item.video}
+              videoId={item.$id}
+              likeCounts={likeCounts} 
+              liked={liked} 
+            />
+          );
+        }}
         ListEmptyComponent={() => (
           <EmptyState
             title="No Videos Found"
@@ -86,6 +97,9 @@ const Profile = () => {
                 subtitle="Followers"
                 titleStyles="text-xl"
               />
+            </View>
+            <View>
+              <Text className="mt-10 font-medium text-3xl text-orange-400">Your Posts</Text>
             </View>
           </View>
         )}

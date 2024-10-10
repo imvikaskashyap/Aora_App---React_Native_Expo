@@ -42,11 +42,9 @@ const Bookmark = () => {
         data={user.likedVideos}
         keyExtractor={(item) => item.$id}
         renderItem={({ item }) => {
-          // Find the corresponding latest video for the current item
           const latestVideo = latestVideos.find(video => video.$id === item.$id);
           const likeCounts = latestVideo ? latestVideo.likes.length : 0;
 
-          // Check if the user has liked this video
           const liked = user?.likedVideos?.some((likedVideo) => likedVideo.$id === item.$id);
 
           return (
