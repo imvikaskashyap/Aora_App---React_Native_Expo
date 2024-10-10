@@ -1,6 +1,6 @@
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { View, Image, FlatList, TouchableOpacity, Text } from "react-native";
+import { View, Image, FlatList, TouchableOpacity, Text, RefreshControl } from "react-native";
 import { icons } from "../../constants";
 import { useGlobalContext } from "../../context/GlobalProvider";
 import useAppWrite from "../../lib/useAppWrite";
@@ -8,18 +8,25 @@ import { getCurrentUser, getLatestVideos, getUserVideos, signOut } from "../../l
 import EmptyState from "../../components/EmptyState";
 import InfoBox from "../../components/InfoBox";
 import VideoCard from "../../components/VideoCard";
+import { useState } from "react";
 
 const Profile = () => {
   const { user, setUser, setIsLoggedIn } = useGlobalContext();
-  const { data: posts } = useAppWrite(() => getUserVideos(user.$id));
-  const { data: latestVideos, } = useAppWrite(getLatestVideos);
+  const { data: posts, refetch: refetchUserVideos } = useAppWrite(() => getUserVideos(user.$id));
+  const { data: latestVideos, refetch: refetchLatestVideos } = useAppWrite(getLatestVideos);
 
+  const [refreshing, setRefreshing] = useState(false);
 
-  // console.log(data, "======????Data>>>>>>>>>>")
+  console.log(posts);
 
-  // console.log(user, "userId=============>>>>>>>>>.")
+  const onRefresh = async () => {
+    setRefreshing(true);
 
-  // console.log(posts)
+    // Re-fetch both user videos and latest videos
+    await Promise.all([refetchUserVideos(), refetchLatestVideos()]);
+
+    setRefreshing(false);
+  };
 
   const logout = async () => {
     await signOut();
@@ -103,6 +110,9 @@ const Profile = () => {
             </View>
           </View>
         )}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       />
     </SafeAreaView>
   );

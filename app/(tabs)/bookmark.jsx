@@ -20,8 +20,8 @@ import { useGlobalContext } from "../../context/GlobalProvider";
 
 const Bookmark = () => {
   const { user, setUser, setIsLoggedIn } = useGlobalContext();
-  const { data: videos, refetch } = useAppWrite(getAllVideos);
-  const { data: latestVideos } = useAppWrite(getLatestVideos);
+  const { data: videos } = useAppWrite(getAllVideos);
+  const { data: latestVideos,refetch } = useAppWrite(getLatestVideos);
 
   const [refreshing, setRefreshing] = useState(false);
 
